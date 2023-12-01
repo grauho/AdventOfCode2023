@@ -34,6 +34,9 @@ int partOne(FILE *fhandle)
 	return running_sum;
 }
 
+/* Currently relies on the input being entirely lowercase, which is the case
+ * for the puzzle input but if one wanted to generalize a case insensitive 
+ * version of strcmp could be used instead */
 static AOC_STAT parseForDigit(char *input, int *output)
 {
 	size_t i = 0;
@@ -58,7 +61,8 @@ static AOC_STAT parseForDigit(char *input, int *output)
 	return AOC_FAILURE;
 }
 
-/* Quite inefficient due to having to parse out the written digits */
+/* Quite inefficient due to having to parse out the written digits but given
+ * the size of the input file it is still more than fast enough */
 int partTwo(FILE *fhandle)
 {
 	AOC_BOOL is_first	= AOC_TRUE;
