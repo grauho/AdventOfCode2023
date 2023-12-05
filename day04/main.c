@@ -30,7 +30,7 @@ struct nodeHopper* newHopper(const size_t initial_size)
 	{
 		fprintf(stderr, "Hopper malloc error\n");
 
-		exit(1);
+		return NULL;
 	}
 
 	if ((ret->nodes = malloc(sizeof(struct treeNode) * arr_len)) == NULL)
@@ -38,7 +38,7 @@ struct nodeHopper* newHopper(const size_t initial_size)
 		fprintf(stderr, "Hopper node array malloc error\n");
 		free(ret);
 
-		exit(1);
+		return NULL;
 	}
 
 	ret->avail_nodes = arr_len;
@@ -60,13 +60,13 @@ static void freeHopper(struct nodeHopper *hopper)
 	}
 }
 
-static void loadHopper(struct nodeHopper *hopper, const unsigned int value)
+static AOC_STAT loadHopper(struct nodeHopper *hopper, const unsigned int value)
 {
 	struct treeNode *new_node = NULL;
 
 	if (hopper == NULL)
 	{
-		return;
+		return AOC_FAILURE;;
 	}
 
 	if (hopper->avail_nodes <= hopper->used_nodes)
@@ -83,7 +83,7 @@ static void loadHopper(struct nodeHopper *hopper, const unsigned int value)
 		{
 			fprintf(stderr, "Load hopper realloc error\n");
 
-			exit(1);
+			return AOC_FAILURE;
 		}
 
 		hopper->nodes = tmp_arr;
@@ -94,6 +94,8 @@ static void loadHopper(struct nodeHopper *hopper, const unsigned int value)
 	new_node->left  = NULL;
 	new_node->right = NULL;
 	new_node->value = value;
+
+	return AOC_SUCCESS;
 }
 
 static size_t seekGlyph(const char *line, const char glyph, size_t cur)
@@ -231,7 +233,13 @@ static unsigned long int processLine(const char *line,
 
 			if (is_loading == AOC_TRUE)
 			{
-				loadHopper(hopper, val);
+				if (loadHopper(hopper, val) == AOC_FAILURE)
+				{
+					fprintf(stderr, 
+						"Hopper realloc error\n");
+
+					return 0;
+				}
 			}
 			else if (findNode(tree, val) != NULL)
 			{
@@ -269,7 +277,12 @@ unsigned long int partOne(FILE *fhandle)
 	unsigned long int running_sum = 0;
 	char line[LINE_MAX] = {0};
 
-	hopper = newHopper(BASE_HOPPER_SIZE);
+	if ((hopper = newHopper(BASE_HOPPER_SIZE)) == NULL)
+	{
+		fprintf(stderr, "Allocation failure\n");
+
+		return 0;
+	}
 
 	while (fgets(line, LINE_MAX, fhandle) != NULL)
 	{
@@ -291,13 +304,18 @@ unsigned long int partOne(FILE *fhandle)
  * or have some kind of shift happen when it reaches it's line limit */
 unsigned long int partTwo(FILE *fhandle)
 {
-	struct nodeHopper *hopper  = NULL;
-	int repeat_table[LINE_MAX] = {0};
-	char line[LINE_MAX]        = {0};
-	unsigned long int line_i	   	   = 0;
-	unsigned long int running_sum 	   = 0;
+	struct nodeHopper *hopper  	    = NULL;
+	unsigned int repeat_table[LINE_MAX] = {0};
+	char line[LINE_MAX]        	    = {0};
+	unsigned long int line_i	    = 0;
+	unsigned long int running_sum 	    = 0;
 
-	hopper = newHopper(BASE_HOPPER_SIZE);
+	if ((hopper = newHopper(BASE_HOPPER_SIZE)) == NULL)
+	{
+		fprintf(stderr, "Allocation failure\n");
+
+		return 0;
+	}
 
 	while (fgets(line, LINE_MAX, fhandle) != NULL)
 	{
